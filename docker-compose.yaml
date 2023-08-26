@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  go-todo:
+    build: .
+    networks:
+      - default
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/usr/src/app
+    env_file:
+      - ../../go-todo/.env
+
+  go-todo-db:
+    container_name: todo-postgres
+    image: postgres
+    env_file:
+      - ../../go-todo/.env
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - default
+
+
+networks:
+  default:
+    name: docker_default
+    external: true
