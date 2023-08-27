@@ -1,18 +1,30 @@
-FROM golang:1-.20-alpine3.18 as build
+FROM golang:1.21-alpine3.18 AS base
+WORKDIR /app
 
-WORKDIR /go/src/app
-
+ENV GO111MODULE="on"
+ENV GOOS="linux"
 ENV CGO_ENABLED=0
-COPY go.* ./
-RUN go mod download
 
-COPY . .
-ARG TARGETOS
-ARG TARGETARCH
-RUN --mount=type=cache,target=/root/.cache/go-build GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o app
+RUN apk update \
+    && apk add --no-cache \
+    ca-certificates \
+    curl \
+    tzdata \
+    git \
+    && update-ca-certificates
 
-FROM alpine:3.18
-COPY --from=build /go/src/app/app /usr/local/bin/app
+FROM base AS builder
+WORKDIR /app
 
+COPY . /app
+RUN go mod download \
+    && go mod verify
+
+RUN go build -o todo -a .
+
+FROM alpine:latest as prod
+
+COPY --from=builder /app/todo /usr/local/bin/todo
 EXPOSE 3000
-ENTRYPOINT ["/usr/local/bin/app"]
+
+ENTRYPOINT ["/usr/local/bin/todo"]

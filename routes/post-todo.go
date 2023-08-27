@@ -37,7 +37,7 @@ func CreateTodo(c *gin.Context) {
 		_ = c.Error(err)
 	}
 
-	sqlStatement := "INSERT INTO todos(id, title, description, deadline, completed) VALUES( $1, $2, $3, $4, $5 )"
+	sqlStatement := "INSERT INTO todo(id, title, description, deadline, completed) VALUES( $1, $2, $3, $4, $5 )"
 
 	_, err = db.Exec(sqlStatement, uuid.New().String(), input.Title, input.Description, input.Deadline, input.Completed)
 	if err != nil {

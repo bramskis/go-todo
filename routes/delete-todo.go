@@ -31,8 +31,7 @@ func DeleteTodo(c *gin.Context) {
 		_ = c.Error(err)
 	}
 
-	sqlStatement := "DELETE FROM todo WHERE id = $1;"
-	_, err = db.Exec(sqlStatement, id)
+	_, err = db.Exec("DELETE FROM todo WHERE id = $1;", id)
 	if err != nil {
 		if DEBUG_MODE == "true" {
 			c.AbortWithStatusJSON(

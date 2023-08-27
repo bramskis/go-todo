@@ -10,22 +10,23 @@ services:
     volumes:
       - .:/usr/src/app
     env_file:
-      - ../../go-todo/.env
+      - .env
 
   go-todo-db:
     container_name: todo-postgres
     image: postgres
-    env_file:
-      - ../../go-todo/.env
     volumes:
-      - postgres-db:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
       - default
+    env_file:
+      - .env
 
+volumes:
+  postgres:
 
 networks:
   default:
     name: docker_default
-    external: true

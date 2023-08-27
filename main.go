@@ -15,6 +15,7 @@ func main() {
 	r.POST("/todo", routes.CreateTodo)
 	r.PUT("/todo", routes.UpdateTodo)
 	r.DELETE("/todo/:id", routes.DeleteTodo)
+	fmt.Println("about to start up")
 
 	err := r.Run("0.0.0.0:3000")
 	if err != nil {
