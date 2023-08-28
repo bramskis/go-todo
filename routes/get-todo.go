@@ -2,6 +2,7 @@ package routes
 
 import (
 	"bramskis/go-todo/types"
+	"bramskis/go-todo/utils"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -11,31 +12,20 @@ import (
 )
 
 func GetTodo(c *gin.Context) {
-	fmt.Println("in GetTodo 2")
 	id := c.Param("id")
-	fmt.Println(id)
 
-	db, err := sql.Open("postgres", psqlInfo)
+	db, err := utils.GetDBConnection()
 	if err != nil {
-		if DEBUG_MODE == "true" {
-			c.AbortWithStatusJSON(
-				http.StatusInternalServerError,
-				gin.H{
-					"Error": fmt.Sprintf("Db connection issue: %s", err.Error()),
-				},
-			)
+		if utils.IsDebugMode() {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
 		} else {
 			c.AbortWithStatus(http.StatusInternalServerError)
 		}
 		return
 	}
-	defer db.Close()
-
-	err = db.Ping()
-	if err != nil {
-		_ = c.Error(err)
-	}
-	fmt.Println("about to query")
+	defer func(db *sql.DB) {
+		_ = db.Close()
+	}(db)
 
 	var toReturn types.Todo
 	if err = db.QueryRow("SELECT * FROM todo WHERE id = $1;", id).Scan(
@@ -46,7 +36,7 @@ func GetTodo(c *gin.Context) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Error": "Request must contain a valid id"})
 			return
 		}
-		if DEBUG_MODE == "true" {
+		if utils.IsDebugMode() {
 			c.AbortWithStatusJSON(
 				http.StatusInternalServerError,
 				gin.H{
@@ -58,6 +48,6 @@ func GetTodo(c *gin.Context) {
 		}
 		return
 	}
-	fmt.Printf("returning todo: %v", toReturn)
+
 	c.JSON(http.StatusOK, toReturn)
 }

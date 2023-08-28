@@ -2,7 +2,8 @@ package main
 
 import (
 	"bramskis/go-todo/routes"
-	"fmt"
+	"bramskis/go-todo/utils"
+	"database/sql"
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,15 +11,39 @@ func main() {
 	r := gin.New()
 	r.ContextWithFallback = true
 
+	initializeDBTable()
+
 	r.GET("/todo", routes.GetTodoAll)
 	r.GET("/todo/:id", routes.GetTodo)
 	r.POST("/todo", routes.CreateTodo)
 	r.PUT("/todo", routes.UpdateTodo)
 	r.DELETE("/todo/:id", routes.DeleteTodo)
-	fmt.Println("about to start up")
 
 	err := r.Run("0.0.0.0:3000")
 	if err != nil {
-		fmt.Printf("Run error encountered: %s", err.Error())
+		panic(err)
+	}
+}
+
+func initializeDBTable() {
+	db, err := utils.GetDBConnection()
+	if err != nil {
+		panic(err)
+	}
+	defer func(db *sql.DB) {
+		_ = db.Close()
+	}(db)
+
+	_, err = db.Exec(
+		`CREATE TABLE IF NOT EXISTS todo (
+			id VARCHAR(255) NOT NULL PRIMARY KEY,
+			title VARCHAR(255) NOT NULL,
+			description VARCHAR(255) NOT NULL,
+			deadline TIMESTAMP NOT NULL,
+			completed BOOLEAN NOT NULL
+		);`,
+	)
+	if err != nil {
+		panic(err)
 	}
 }

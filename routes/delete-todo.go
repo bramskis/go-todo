@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"bramskis/go-todo/utils"
 	"database/sql"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -10,30 +11,22 @@ import (
 func DeleteTodo(c *gin.Context) {
 	id := c.Param("id")
 
-	db, err := sql.Open("postgres", psqlInfo)
+	db, err := utils.GetDBConnection()
 	if err != nil {
-		if DEBUG_MODE == "true" {
-			c.AbortWithStatusJSON(
-				http.StatusInternalServerError,
-				gin.H{
-					"Error": fmt.Sprintf("Db connection issue: %s", err.Error()),
-				},
-			)
+		if utils.IsDebugMode() {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
 		} else {
 			c.AbortWithStatus(http.StatusInternalServerError)
 		}
 		return
 	}
-	defer db.Close()
-
-	err = db.Ping()
-	if err != nil {
-		_ = c.Error(err)
-	}
+	defer func(db *sql.DB) {
+		_ = db.Close()
+	}(db)
 
 	_, err = db.Exec("DELETE FROM todo WHERE id = $1;", id)
 	if err != nil {
-		if DEBUG_MODE == "true" {
+		if utils.IsDebugMode() {
 			c.AbortWithStatusJSON(
 				http.StatusInternalServerError,
 				gin.H{
