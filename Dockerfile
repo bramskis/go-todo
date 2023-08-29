@@ -25,6 +25,6 @@ RUN go build -o todo -a .
 FROM alpine:latest as prod
 
 COPY --from=builder /app/todo /usr/local/bin/todo
-EXPOSE 3000
+EXPOSE 8080
 
 ENTRYPOINT ["/usr/local/bin/todo"]

@@ -19,7 +19,7 @@ func main() {
 	r.PUT("/todo", routes.UpdateTodo)
 	r.DELETE("/todo/:id", routes.DeleteTodo)
 
-	err := r.Run("0.0.0.0:3000")
+	err := r.Run("0.0.0.0:8080")
 	if err != nil {
 		panic(err)
 	}
