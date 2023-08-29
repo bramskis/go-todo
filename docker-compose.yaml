@@ -9,23 +9,6 @@ services:
       - "8080:8080"
     volumes:
       - .:/usr/src/app
-    env_file:
-      - .env
-
-  go-todo-db:
-    container_name: todo-postgres
-    image: postgres
-    volumes:
-      - postgres:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - default
-    env_file:
-      - .env
-
-volumes:
-  postgres:
 
 networks:
   default:

@@ -13,6 +13,7 @@ func main() {
 
 	initializeDBTable()
 
+	r.GET("/", routes.Index)
 	r.GET("/todo", routes.GetTodoAll)
 	r.GET("/todo/:id", routes.GetTodo)
 	r.POST("/todo", routes.CreateTodo)
