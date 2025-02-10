@@ -3,8 +3,9 @@ package utils
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
 	"os"
+
+	_ "github.com/lib/pq"
 )
 
 var psqlInfo = fmt.Sprintf("host=%s port=%s user=%s "+
@@ -16,17 +17,30 @@ var psqlInfo = fmt.Sprintf("host=%s port=%s user=%s "+
 	os.Getenv("POSTGRES_NAME"),
 )
 
-// GetDBConnection returns a connection to the Postgresql database
-// This should NEVER be used without including a call to close on the *sql.DB returned
-func GetDBConnection() (*sql.DB, error) {
+var db *sql.DB
+
+func initializeDBConnection() error {
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		return nil, fmt.Errorf("unable to open connection to database: %s", err.Error())
+		return fmt.Errorf("unable to open connection to database: %s", err.Error())
 	}
 
 	err = db.Ping()
 	if err != nil {
-		return nil, fmt.Errorf("unable to ping database connection: %s", err.Error())
+		return fmt.Errorf("unable to ping database connection: %s", err.Error())
+	}
+
+	return nil
+}
+
+// GetDBConnection returns a connection to the Postgresql database
+// This should NEVER be used without including a call to close on the *sql.DB returned
+func GetDBConnection() (*sql.DB, error) {
+	if db == nil {
+		err := initializeDBConnection()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return db, nil
